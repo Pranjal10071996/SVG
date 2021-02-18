@@ -28,7 +28,7 @@ padding:0;
 }
 
 .btn-group .button1 {
-  background-color: white;
+  background-color: red;
   border: 1px solid blue;
   color: black;
   padding: 15px 32px;
@@ -67,6 +67,9 @@ padding-left:300px;
    <div>
             <button onclick="setup2()"  class = "button"> Clear Board </button>
    </div>
+   <div>
+            <button onclick="setup3()"  class = "button1"> Red </button>
+   </div>
 	
 </div>
  
@@ -83,12 +86,29 @@ let newLine;
 let newCircle;
 let drawing = false;
 let draw = false;
+lineee = false;
+redline = false;
 console.log("111111111111111",drawing);
 
 function onMouseDown(event) {
   drawing = true;
   newLine = document.createElementNS(svgNS, "line");
   newLine.setAttribute("stroke", "black");
+  newLine.setAttribute("x1", event.clientX);
+  newLine.setAttribute("y1", event.clientY);
+  newLine.setAttribute("x2", event.clientX);
+  newLine.setAttribute("y2", event.clientY);
+
+  svg.appendChild(newLine);
+}
+
+function onMouseDown1(event) {
+  drawing = true;
+  newLine = document.createElementNS(svgNS, "line");
+  if(lineee == true && redline == true)
+  {
+  newLine.setAttribute("stroke", "red");
+  }
   newLine.setAttribute("x1", event.clientX);
   newLine.setAttribute("y1", event.clientY);
   newLine.setAttribute("x2", event.clientX);
@@ -133,7 +153,17 @@ function onMouseMove(event) {
   }
 }
 
+function onMouseMove1(event) {
+  if (drawing) {
+    newLine.setAttribute("x2", event.clientX);
+    newLine.setAttribute("y2", event.clientY);
+  }
+}
+
 function onMouseUp(event) {
+  drawing = false;
+}
+function onMouseUp1(event) {
   drawing = false;
 }
 
@@ -143,6 +173,7 @@ function onUp(event) {
 
 
 function setup() {
+lineee = true;
  document.addEventListener("mousemove", onMouseMove);
  document.addEventListener("mousedown", onMouseDown);
  document.addEventListener("mouseup", onMouseUp);
@@ -150,10 +181,16 @@ function setup() {
  document.removeEventListener("mousemove", onMove);
  document.removeEventListener("mousedown", onDrag);
  document.removeEventListener("mouseup", onUp);
+ 
+ document.removeEventListener("mousemove", onMouseMove1);
+ document.removeEventListener("mousedown", onMouseDown1);
+ document.removeEventListener("mouseup", onMouseUp1);
 }
 
 
 function setup1() {
+ lineee = false;
+ redline = false;
  document.addEventListener("mousemove", onMove);
  document.addEventListener("mousedown", onDrag);
  document.addEventListener("mouseup", onUp);
@@ -161,6 +198,10 @@ function setup1() {
   document.removeEventListener("mousemove", onMouseMove);
  document.removeEventListener("mousedown", onMouseDown);
  document.removeEventListener("mouseup", onMouseUp);
+ 
+ document.removeEventListener("mousemove", onMouseMove1);
+ document.removeEventListener("mousedown", onMouseDown1);
+ document.removeEventListener("mouseup", onMouseUp1);
  
 }
 
@@ -174,6 +215,25 @@ if(newLine)
 	{
 	svg.remove(newLine);
     }
+
+}
+function setup3()
+{
+if(newLine)
+{
+redline = true;
+ document.addEventListener("mousemove", onMouseMove1);
+ document.addEventListener("mousedown", onMouseDown1);
+ document.addEventListener("mouseup", onMouseUp1);
+ 
+ document.removeEventListener("mousemove", onMove);
+ document.removeEventListener("mousedown", onDrag);
+ document.removeEventListener("mouseup", onUp);
+ 
+ document.removeEventListener("mousemove", onMouseMove);
+ document.removeEventListener("mousedown", onMouseDown);
+ document.removeEventListener("mouseup", onMouseUp);
+ }
 
 }
 
