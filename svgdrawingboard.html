@@ -1,0 +1,298 @@
+<html>
+
+<div id="divSmoothingFactor">
+    <label for="BufferSize">shapes</label>
+   <div select id="BufferSize" class="btn-group">
+			<button onclick="setupcircle()" class = "button" value="circle"> Circle </button>  
+			<button onclick="setupLine()" class = "button" value="line"> Line </button>  
+			<button onclick="setupClearboard()" class = "button"> clear Board </button>  
+        </div>
+	Color:
+	<select id="color">
+	  <option value="red">Red</option>
+	  <option value="Blue">Blue</option>
+	  <option value="Green">Green</option>
+	</select>
+</div>
+<div id = "svg_canvas">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="svgElement" x="0px" y="0px" width="800" height="500" >
+<g id = "mygrop"> </g>
+</div>
+</svg>
+
+<style>
+
+.btn-group .button {
+  background-color: white;
+  border: 1px solid blue;
+  color: black;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  float: left;
+}
+
+.btn-group .button1 {
+  background-color: red;
+  border: 1px solid blue;
+  color: black;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  float: left;
+}
+
+.btn-group .button:not(:last-child) {
+  border-right: none;
+}
+
+.btn-group .button:hover {
+  background-color: blue;
+}
+html, body
+{
+    padding: 0px;
+    margin: 0px;
+}
+#svgElement
+{
+    border: 1px solid;
+    margin-top: 4px;
+    margin-left: 4px;
+    cursor: default;
+}
+#divSmoothingFactor
+{
+    position: absolute;
+    left: 14px;
+    top: 12px;
+}
+#mygrop
+{
+	border: 6px solid;
+	margin-top: 4px;
+    margin-left: 4px;
+	color :red;
+}
+</style>
+
+<script>
+
+
+var svgElement = document.getElementById("svgElement");
+var path = null;
+var strPath;
+radius = 0;
+var isDown;
+var shape = null;
+var strokeWidth = 2;
+var bufferSize;
+var buffer = []; 
+var currentDrawing = null;
+var point;
+var startX,startY;
+var x = null;
+var y = null;
+
+
+
+
+function setupcircle()
+{
+	//console.log("11");
+   svgElement.addEventListener("mousedown", startcircledrawing);
+   svgElement.removeEventListener("mousedown", startlinedrawing1);
+}
+
+
+function startcircledrawing(e)
+{
+	isDown = true;
+	var pt = getMousePoint(e);
+    startX = pt.x - e.offsetX;
+    startY = pt.y - e.offsetY;
+	strpath = '';
+	const color = document.getElementById('color').value;
+    bufferSize = document.getElementById("BufferSize").value;
+    path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute("fill", "none");
+	 
+	 // console.log(color,"color");
+    path.setAttribute("stroke", color);
+	path.setAttribute("stroke-width", strokeWidth);
+    strPath = "M" + pt.x + " " + pt.y;
+    path.setAttribute("d", strPath);
+    svgElement.appendChild(path);
+  svgElement.addEventListener("mousemove", continuecircledrawing);
+  svgElement.removeEventListener("mousemove", continuelinedrawing);
+	
+
+}
+function continuecircledrawing(e)
+{
+	if (!isDown) return;
+	strPath = '';
+	point = getMousePoint(e);
+    if (path) {
+		 x = e.pageX;
+		  y = e.pageY;
+		  //console.log(x, y);
+		var pt = getMousePoint(e);
+		const radius = Math.abs(point.x - e.offsetX - startX);
+		console.log("c_point",point.x);
+		 strPath = '';
+		strPath += helperGetArc(e.pageX ,e.pageY ,radius,0,359);
+		path.setAttribute("d", strPath);
+		svgElement.appendChild(path);
+    } 
+	 svgElement.addEventListener("mouseup", enddrawing);
+
+}
+
+ function helperGetArc(x, y, radius, startAngle, endAngle) {
+
+    const start = helperPolarToCartesian(x, y, radius, endAngle);
+
+    const end = helperPolarToCartesian(x, y, radius, startAngle);
+
+    const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
+
+    const d = ['M',start.x,start.y,'A',radius,radius,0,largeArcFlag,0,end.x,end.y].join(' ');
+
+    return d;
+
+  }
+  
+  
+   function helperPolarToCartesian(centerX,centerY,radius,angleInDegrees) {
+
+    const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+
+    return {
+
+      x: centerX + radius * Math.cos(angleInRadians),
+
+      y: centerY + radius * Math.sin(angleInRadians)
+
+    };
+
+  }
+
+
+
+	function setupLine()
+	{
+		//console.log("22");
+	   svgElement.removeEventListener("mousedown", startcircledrawing);
+	   svgElement.addEventListener("mousedown", startlinedrawing1);
+	}
+	function startlinedrawing1(e)
+	{
+
+		isDown = true;
+		const color = document.getElementById('color').value;
+		path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+		path.setAttribute("fill", "none");
+		path.setAttribute("stroke", color);
+		path.setAttribute("stroke-width", strokeWidth);
+		buffer = [];
+		var pt = getMousePosition(e);
+		strPath = "M" + pt.x + " " + pt.y;
+
+		path.setAttribute("d", strPath);
+		svgElement.appendChild(path);
+		
+		svgElement.addEventListener("mousemove", continuelinedrawing);
+		svgElement.removeEventListener("mousemove", continuecircledrawing);
+
+	}
+
+
+	function continuelinedrawing(e)
+	{
+	if (!isDown) return;
+	 x = e.pageX;
+	  y = e.pageY;
+	  //console.log(x, y);
+		if (path) {
+			appendToBuffer(getMousePosition(e));
+			updatelinePath();
+		}
+
+	}
+
+
+function enddrawing(e)
+{
+isDown = false;
+    if (path) {
+        path = null;
+    }
+	svgElement.removeEventListener("mouseup", enddrawing);
+}
+
+function setupClearboard()
+{
+   if(strPath)
+   {
+		document.getElementById("svgElement").innerHTML = "";
+   } 
+}
+
+
+ getMousePosition = function (e) {
+ //console.log("e.pageX",e.pageX);
+// console.log("e.pageY",e.pageY);
+
+    return {
+        x: e.pageX,
+        y: e.pageY,
+		
+    }
+};
+ function getMousePoint(e) {
+
+    const pgX = getPageCordinates(e).pgX;
+
+    const pgY = getPageCordinates(e).pgY;
+
+    const myX = pgX - e.offsetX;
+
+    const myY = pgY - e.offsetY;
+
+    return { x: myX, y: myY };
+
+  }
+  
+ function getPageCordinates(e) {
+
+    let pggX, pggY;
+
+    pggX = e.pageX;
+
+    pggY = e.pageY;
+
+    return { pgX: pggX, pgY: pggY };
+}
+
+var appendToBuffer = function (pt) {
+    buffer.push(pt);
+};
+
+
+var updatelinePath = function () {
+       var endPath = "";
+        endPath += "L" + "" + x + " " + y;
+        path.setAttribute("d", strPath + endPath);
+		svgElement.addEventListener("mouseup", enddrawing);
+};
+
+
+</script>
+</html>
